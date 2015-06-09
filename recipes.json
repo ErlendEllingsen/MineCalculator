@@ -1,0 +1,35 @@
+{
+	"Vanilla": {
+		"iron ingot": {
+	    	"iron ore": 1
+	    }
+	},
+
+	"Thermal Expansion": {	
+		"steam dynamo": {
+	        "redstone transmission coil": 1,
+	        "copper gear": 2,
+	        "copper ingot": 3,
+	        "redstone": 1
+	    },
+
+	    "redstone transmission coil" : {
+	    	"redstone": 2,
+	    	"silver ingot": 1
+	    },
+
+	    "copper gear" : {
+	    	"copper ingot": 4,
+	    	"iron ingot": 1
+	    },
+
+	    "copper ingot": {
+	    	"copper ore": 1
+	    },
+	    "silver ingot": {
+	    	"silver ore": 1
+	    }
+
+	}
+    
+}

@@ -1,0 +1,9 @@
+body, html {
+	margin: 0px;
+	padding: 0px;
+}
+
+body {
+	background-image: url('../images/concrete_seamless.png');
+	background-repeat: repeat-xy;
+}
