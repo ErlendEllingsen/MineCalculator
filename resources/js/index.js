@@ -1,5 +1,8 @@
 var resourcetotalResourcesDB = {};
+
 var totalResources = {};
+var totalResourcesMinReq = {};
+
 var availableMods = [
 	'Vanilla', 'Thermal Expansion'
 ];
@@ -8,13 +11,12 @@ var availableMods = [
 $(document).ready(function(){	
 
 	$.get( "recipes.json", function( data ) {
-		resourceDB = JSON.parse(data);	
-		
 
+		resourceDB = data;	
 
 		//Try
-		var topObject = resourceDB['Thermal Expansion']['steam dynamo'];
-		calculate('steam dynamo', 1);
+		calculate('bowl', 1);
+		postCalculate();
 		
 		$.each(totalResources, function(materialName, materialAmount) {
 			$('#totalResources').append('<li>' + materialName + ' x ' + materialAmount + '</li>');
@@ -34,15 +36,17 @@ function calculate(resource, amount) {
 	//Check that the resource and get the innermost.
 	var foundModName = false;
 	$.each(availableMods, function(modIndex, modName){
-		if (resourceDB[modName][resource] != undefined) foundModName = modName;
+		if (resourceDB[modName]['recipes'][resource] != undefined) foundModName = modName;
 	});
 
 	//Mod does not exist.. 
 	if (foundModName === false) return;
-	// console.log('found mod name (' + foundModName + ') for ' + resource + ' x ' + amount);
+	
+	//Check if resource is in minimumRequirements, if so -> store for post-processing.
+	if (resourceDB[foundModName]['minimumRequirements'][resource] != undefined) totalResourcesMinReq[resource] = foundModName;
 
 	//Mod found and resource therefore exists.
-	var subResources = resourceDB[foundModName][resource];
+	var subResources = resourceDB[foundModName]['recipes'][resource];
 
 	//Check subresoruces, check if they can further expand.
 	$.each(subResources, function(subResourceName, subResourceAmount){
@@ -50,7 +54,7 @@ function calculate(resource, amount) {
 		//Check the mod-thing with the sub-resources.
 		var foundModName = false;
 		$.each(availableMods, function(modIndex, modName){
-			if (resourceDB[modName][subResourceName] != undefined) foundModName = modName;
+			if (resourceDB[modName]['recipes'][subResourceName] != undefined) foundModName = modName;
 		});
 
 		if (foundModName) { //Can further expand
@@ -66,6 +70,10 @@ function calculate(resource, amount) {
 	//END PARSING OF CURRENT.
 	//ADD SUBMATERIALS
 	$.each(remainingObject, function(materialName, materialAmount) {
+
+		//Adjust materialamount! materialAmount needs to be multiplied with amount (caller-resource-amt).
+		materialAmount *= amount;
+
 		calculate(materialName, materialAmount);
 		console.log('Calculating ' + materialName + ' x ' + materialAmount);
 	});
@@ -73,7 +81,6 @@ function calculate(resource, amount) {
 
 	//Add the gathered materials to the total.
 	$.each(exportObject, function(materialResource, materialAmount) {
-		console.log('Adding resource ' + materialResource + ' x ' + materialAmount + ' for ' + resource);
 
 		if (totalResources[materialResource] == undefined) {
 			totalResources[materialResource] = materialAmount * amount;
@@ -88,17 +95,19 @@ function calculate(resource, amount) {
 	//end of calculate.
 }
 
+function postCalculate() {
+	
+
+	$.each(totalResourcesMinReq, function(resourceName, resourceMod){
+
+		//Find the multiplication-rule.
+		var minReqMR = resourceDB[resourceMod]['minimumRequirements'][resourceName];
+		var currentAmnt = totalResources[resourceName];
+
+		console.log('Current sum of ' + resourceName + ' is ' + currentAmnt + ', needs to be product of ' + minReqMR);
 
 
-/**
- * $.each(rawMaterials, function(materialResource, materialAmount) {
+	});
 
-				if (totalResources[materialResource] == undefined) {
-					totalResources[materialResource] = materialAmount * amount;
-				} else {
-					totalResources[materialResource] += materialAmount * amount;
-				}
 
-				//end of materialloop.
-			});
- */
+}
